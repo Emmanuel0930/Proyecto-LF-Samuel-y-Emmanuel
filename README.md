@@ -49,3 +49,27 @@ Make sure you have the following installed on your system:
 1. Clone this repository to your local machine using the following command:
    ```bash
    git clone https://github.com/Emmanuel0930/Proyecto-LF-Samuel-y-Emmanuel.git
+
+2. When running the program, you will need to input the grammar in the following format:
+
+   n
+   S -> a b c
+   B -> d e f
+   C -> g h i
+   D -> j k l
+   Where `n` is the number of non-terminals, and each production is separated by a blank space.
+
+3. After providing the grammar, the program may present you with three possible scenarios:
+
+- **Case 1: The grammar is either LL(1) or SLR(1):**
+  - Simply input the string you want to analyze.
+
+- **Case 2: The grammar is neither LL(1) nor SLR(1):**
+  - In this case, the program will terminate execution.
+
+- **Case 3: The grammar is both LL(1) and SLR(1):**
+  - You will be prompted to select a parser:
+    ```
+    Select a parser (T: for LL(1), B: for SLR(1), Q: exit):
+    ```
+  - Based on your selection, you can then input the strings you wish to analyze.
