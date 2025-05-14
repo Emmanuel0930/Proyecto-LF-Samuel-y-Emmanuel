@@ -1,0 +1,71 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Documentación de Problemas y Soluciones del Proyecto \\ LL(1) y SLR(1)}
+\author{Emmanuel Alvarez Castrillon y Samuel Herrera Galvis - Lenguajes Formales}
+\date{Mayo 14, 2025}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introducción}
+
+Durante el desarrollo del proyecto se implementaron algoritmos para el cálculo de los conjuntos First y Follow, y para la construcción e interpretación de analizadores sintácticos LL(1) y SLR(1). Si bien gran parte del proyecto se completó sin mayores contratiempos, surgieron varios problemas durante la implementación y validación de los analizadores, especialmente en lo referente al correcto reconocimiento de cadenas, según el comportamiento esperado para cada tipo de gramática.
+
+\section*{Problema Principal Encontrado}
+
+Uno de los principales retos se presentó con la ejecución del \textbf{Caso 1}, definido por el enunciado como:
+
+\begin{quote}
+``La gramática es SLR(1) y LL(1). Imprimir: `Seleccionar un analizador (T: para LL(1), B: para SLR(1), Q: salir):', luego recibir cadenas para analizar hasta que se proporcione una línea vacía.''
+\end{quote}
+
+\subsection*{Comportamiento Incorrecto Inicial}
+
+Al comenzar a probar con una gramática que cumplía con las condiciones de ser tanto LL(1) como SLR(1), observamos que la ejecución era defectuosa en el modo SLR(1). Más específicamente:
+
+\begin{itemize}
+    \item Las cadenas ingresadas eran correctamente evaluadas por el analizador LL(1), devolviendo salidas ``yes'', ``yes'' y ``no'', según lo esperado.
+    \item Sin embargo, al seleccionar el analizador SLR(1), todas las cadenas ingresadas eran incorrectamente rechazadas, mostrando ``no'', ``no'', ``no'', incluso para aquellas válidas según la gramática.
+\end{itemize}
+
+\subsection*{Diagnóstico y Solución}
+
+Tras una revisión del código, se detectaron las siguientes posibles causas del fallo:
+
+\begin{enumerate}
+    \item El analizador SLR(1) no interpretaba correctamente el símbolo de fin de cadena \texttt{\$}, lo que provocaba un rechazo prematuro en muchos casos.
+    \item Había problemas en el manejo de las acciones ``shift'', ``reduce'' y ``accept'' dentro de la tabla ACTION construida a partir de la colección canónica de elementos LR(0).
+    \item La estructura de la pila y el procesamiento de símbolos en la función \texttt{parse} del archivo \texttt{slr1\_parser.py} no seguía correctamente la lógica del algoritmo SLR(1).
+\end{enumerate}
+
+Para resolverlo, se tomaron las siguientes medidas:
+
+\begin{itemize}
+    \item Se revisó y corrigió el algoritmo de construcción de las tablas ACTION y GOTO, asegurando que se generaran correctamente las transiciones y acciones de reducción.
+    \item Se implementó una verificación más estricta de los símbolos en las producciones, prestando especial atención a cómo se representaban epsilon (\texttt{e}) y el símbolo de fin de entrada (\texttt{\$}).
+    \item Se depuró detalladamente la función de análisis, utilizando trazas para cada transición de la pila y la lectura de tokens, permitiendo aislar errores de lógica.
+\end{itemize}
+
+Luego de múltiples iteraciones y ajustes, el comportamiento del analizador SLR(1) fue corregido y pasó a reflejar con precisión las decisiones esperadas: aceptando o rechazando las cadenas de prueba de acuerdo a la gramática, igual que el analizador LL(1).
+
+\section*{Otros Problemas Menores}
+
+\begin{itemize}
+    \item \textbf{Separación incorrecta de producciones:} En etapas tempranas, el análisis del input fallaba con producciones con múltiples alternativas debido a una segmentación incorrecta. Esto se resolvió reformateando el método de lectura y normalización de la gramática para dividir correctamente alternativas separadas por espacios y barras verticales.
+    
+    \item \textbf{Errores con producciones vacías:} Inicialmente, las producciones con epsilon no se trataban adecuadamente, lo que afectaba los conjuntos First y Follow. Se mejoró el manejo de estas producciones usando tuplas vacías y condiciones explícitas.
+
+    \item \textbf{Formateo de salida:} Las respuestas del programa no coincidían con los ejemplos requeridos. Se estandarizaron las salidas para que fueran ``yes'' o ``no'', en minúscula, como pedía el ejemplo 2 del enunciado.
+\end{itemize}
+
+\section*{Conclusiones}
+
+La implementación del proyecto permitió profundizar en el entendimiento de los conceptos fundamentales de análisis sintáctico. Resolver los problemas asociados al funcionamiento del analizador SLR(1) fue particularmente enriquecedor, ya que implicó una revisión minuciosa de los conceptos de autómatas LR, el manejo de estados, y el uso correcto de Follow en acciones de reducción. El sistema final ahora permite analizar cualquier gramática adecuada y clasificarla como LL(1), SLR(1), ambas o ninguna, ejecutando correctamente los analizadores según el caso.
+
+\end{document}
